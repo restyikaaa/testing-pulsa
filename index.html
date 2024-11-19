@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ree Cell</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffe6f2; /* Background pink muda */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            border: 2px solid #ff69b4; /* Border pink */
+        }
+
+        h1 {
+            text-align: center;
+            color: #ff69b4; /* Warna header pink */
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .phone-input {
+            display: flex;
+            align-items: center;
+        }
+
+        .phone-input span {
+            padding: 8px;
+            background-color: #ddd;
+            border: 1px solid #ddd;
+            border-radius: 4px 0 0 4px;
+            border-right: none;
+        }
+
+        .phone-input input {
+            border-radius: 0 4px 4px 0;
+            border-left: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #ff69b4; /* Warna tombol pink */
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #ff1493; /* Warna tombol pink lebih gelap */
+        }
+
+        .voucher-section {
+            display: none;
+        }
+
+        #total {
+            text-align: center;
+            margin-top: 20px;
+            color: #28a745;
+        }
+
+        .details {
+            margin-top: 20px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Ree Cell</h1>
+        <form id="pulsaForm">
+            <div class="form-group">
+                <label for="provider">Pilih Kartu:</label>
+                <select id="provider" name="provider" required>
+                    <option value="">--Pilih Kartu--</option>
+                    <option value="telkomsel">Telkomsel</option>
+                    <option value="xl">XL</option>
+                    <option value="indosat">Indosat</option>
+                    <option value="tri">Tri</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="phone">Nomor Telepon:</label>
+                <div class="phone-input">
+                    <span>+62</span>
+                    <input type="tel" id="phone" name="phone" maxlength="11" pattern="[0-9]{10,11}" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="amount">Jumlah Pulsa:</label>
+                <select id="amount" name="amount" required>
+                    <option value="">--Pilih Jumlah Pulsa--</option>
+                    <option value="5000">Rp 5,000</option>
+                    <option value="10000">Rp 10,000</option>
+                    <option value="20000">Rp 20,000</option>
+                    <option value="25000">Rp 25,000</option>
+                    <option value="50000">Rp 50,000</option>
+                    <option value="100000">Rp 100,000</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="voucher">Apakah Anda memiliki voucher?</label>
+                <select id="voucher" name="voucher" onchange="toggleVoucherCode()">
+                    <option value="no">Tidak</option>
+                    <option value="yes">Ya</option>
+                </select>
+            </div>
+            <div class="form-group voucher-section" id="voucherCodeSection">
+                <label for="voucherCode">Masukkan Kode Voucher:</label>
+                <input type="text" id="voucherCode" name="voucherCode">
+            </div>
+            <button type="button" onclick="calculateTotal()">Hitung Total</button>
+        </form>
+        <div id="total" class="details"></div>
+    </div>
+    <script>
+        function toggleVoucherCode() {
+            const voucher = document.getElementById('voucher').value;
+            const voucherCodeSection = document.getElementById('voucherCodeSection');
+            if (voucher === 'yes') {
+                voucherCodeSection.style.display = 'block';
+            } else {
+                voucherCodeSection.style.display = 'none';
+            }
+        }
+
+        function calculateTotal() {
+            const provider = document.getElementById('provider').value;
+            const phone = document.getElementById('phone').value;
+            const amount = document.getElementById('amount').value;
+            const voucher = document.getElementById('voucher').value;
+            const voucherCode = document.getElementById('voucherCode').value;
+
+            if (!provider || !phone || !amount || (voucher === 'yes' && !voucherCode)) {
+                alert('Harap isi semua data yang diperlukan!');
+                return;
+            }
+
+            let total = parseFloat(amount);
+            let voucherDiscount = 0;
+            let purchaseDiscount = 0;
+            const PPN = 0.05; // 5% PPN
+
+            if (voucher === 'yes' && voucherCode === 'PULSAMURAH') {
+                voucherDiscount = total * 0.03; // Diskon 3% dari voucher
+            }
+
+            if (total >= 50000) {
+                purchaseDiscount = total * 0.03; // Diskon 3% untuk pembelian >= Rp 50,000
+            }
+
+            total -= (voucherDiscount + purchaseDiscount);
+            const tax = total * PPN;
+            total += tax;
+
+            document.getElementById('total').innerHTML = `
+                <p>Provider: ${provider.charAt(0).toUpperCase() + provider.slice(1)}</p>
+                <p>Nomor Telepon: +62${phone}</p>
+                <p>Jumlah Pulsa: Rp ${parseFloat(amount).toFixed(2)}</p>
+                <p>Diskon Voucher: Rp ${voucherDiscount.toFixed(2)}</p>
+                <p>Diskon Pembelian: Rp ${purchaseDiscount.toFixed(2)}</p>
+                <p>PPN (5%): Rp ${tax.toFixed(2)}</p>
+                <h2>Total Pembayaran: Rp ${total.toFixed(2)}</h2>
+            `;
+        }
+    </script>
+</body>
+</html>
